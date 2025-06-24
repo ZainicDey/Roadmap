@@ -96,6 +96,13 @@ class PostViewSet(ModelViewSet):
         queryset = self.get_queryset()
 
         ordering = request.query_params.get('ordering')
+        category = request.query_params.get('category')
+        status = request.query_params.get('status')
+        print(f"Ordering: {ordering}, Category: {category}, Status: {status}")
+        if category:
+            queryset = queryset.filter(category__iexact=category)
+        if status:
+            queryset = queryset.filter(status__iexact=status)
         if ordering == 'score':
             queryset = queryset.order_by('-score')
         elif ordering == '-created_at':
