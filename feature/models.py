@@ -21,8 +21,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='roadmap_items')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    like_count = models.PositiveIntegerField(default=0)
-    dislike_count = models.PositiveIntegerField(default=0)
+    score = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

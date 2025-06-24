@@ -10,7 +10,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'description', 'author', 'like_count', 'dislike_count', 'time', 'your_reaction', 'status', 'category', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'author', 'score', 'time', 'your_reaction', 'status', 'category', 'created_at', 'updated_at']
 
     def get_time(self, obj):
         now = timezone.now()

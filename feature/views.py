@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from .serializers import PostSerializer, CommentSerializer, PostDetailSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .models import Post, Reaction, Comment
 
@@ -22,15 +21,14 @@ def react_to_post(request, post_id):
     except Post.DoesNotExist:
         return Response({'detail': 'Post not found.'}, status=404)
 
-    if not Reaction.objects.filter(user=user, post=post).exists():
-        existing_reaction = None
+    existing_reaction = Reaction.objects.filter(user=user, post=post).first()
 
     if reaction_type == 'remove':
         if existing_reaction:
             if existing_reaction.reaction == 'like':
-                post.like_count -= 1
+                post.score -= 1
             else:
-                post.dislike_count -= 1
+                post.score += 1
             existing_reaction.delete()
             post.save()
     else:
@@ -38,29 +36,23 @@ def react_to_post(request, post_id):
             if existing_reaction.reaction == reaction_type:
                 return Response({'detail': f'Already {reaction_type}d.'}, status=200)
             else:
-                if existing_reaction.reaction == 'like':
-                    post.like_count -= 1
-                    post.dislike_count += 1
+                if reaction_type == 'dislike':
+                    post.score -= 2
                 else:
-                    post.dislike_count -= 1
-                    post.like_count += 1
+                    post.score += 2
                 existing_reaction.reaction = reaction_type
                 existing_reaction.save()
                 post.save()
         else:
-            # New reaction
             Reaction.objects.create(user=user, post=post, reaction=reaction_type)
-            if reaction_type == 'like':
-                post.like_count += 1
-            else:
-                post.dislike_count += 1
+            post.score += 1 if reaction_type == 'like' else -1
             post.save()
 
     return Response({
-        'like_count': post.like_count,
-        'dislike_count': post.dislike_count,
+        'score': post.score,
         'your_reaction': reaction_type if reaction_type != 'remove' else None
     })
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -81,8 +73,13 @@ def comment_on_post(request, post_id):
 
     return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+from django.db.models import F, ExpressionWrapper, IntegerField
+
 class PostViewSet(ModelViewSet):
-    queryset = Post.objects.all()
+    def get_queryset(self):
+        return Post.objects.all()
+    
+    ordering_fields = ['created_at', 'updated_at', 'score']
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
@@ -94,3 +91,17 @@ class PostViewSet(ModelViewSet):
         if self.action == 'retrieve':
             return PostDetailSerializer
         return PostSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        ordering = request.query_params.get('ordering')
+        if ordering == 'score':
+            queryset = queryset.order_by('-score')
+        elif ordering == '-created_at':
+            queryset = queryset.order_by('-created_at')
+        elif ordering == 'created_at':
+            queryset = queryset.order_by('created_at')
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
