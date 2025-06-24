@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'user',
+    'corsheaders',
+    'feature',
 ]
 from datetime import timedelta
 SIMPLE_JWT = {
@@ -101,7 +103,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://your-frontend.vercel.app",
     "https://roadmap-frontend-d4scup2pd-zainicdeys-projects.vercel.app",
-    "https://roadmap-frontend-black.vercel.app/"
+    "https://roadmap-frontend-black.vercel.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
