@@ -10,9 +10,10 @@ from .models import Post, Reaction, Comment
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def react_to_post(request, post_id):
+    print('here')
     user = request.user
     reaction_type = request.data.get('reaction')
-
+    
     if reaction_type not in ['like', 'dislike', 'remove']:
         return Response({'detail': 'Invalid reaction type.'}, status=400)
 
@@ -91,6 +92,9 @@ class PostViewSet(ModelViewSet):
         if self.action == 'retrieve':
             return PostDetailSerializer
         return PostSerializer
+    
+    def get_serializer_context(self):
+        return {'request': self.request}
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

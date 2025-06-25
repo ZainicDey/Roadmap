@@ -7,10 +7,11 @@ class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
     time = serializers.SerializerMethodField()
     your_reaction = serializers.SerializerMethodField()
+    comment_count = serializers.IntegerField(source='comments.count', read_only=True)
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'description', 'author', 'score', 'time', 'your_reaction', 'status', 'category', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'author', 'score', 'time', 'your_reaction', 'comment_count', 'status', 'category', 'created_at', 'updated_at']
 
     def get_time(self, obj):
         now = timezone.now()
