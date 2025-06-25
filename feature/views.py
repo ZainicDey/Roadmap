@@ -112,3 +112,48 @@ class PostViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+class CommentViewSet(ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        post_id = self.kwargs.get('post_id')
+        if post_id:
+            return self.queryset.filter(post_id=post_id)
+        return self.queryset
+
+    def create(self, request):
+        post_id = request.data.get('post_id')
+        content = request.data.get('content')
+        comment_id = request.data.get('comment_id')
+
+        if not post_id or not content:
+            return Response({'detail': 'Post ID and content are required.'}, status=400)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({'detail': 'Post not found.'}, status=404)
+
+        parent_comment = None
+        if comment_id:
+            try:
+                parent_comment = Comment.objects.get(id=comment_id)
+            except Comment.DoesNotExist:
+                return Response({'detail': 'Parent comment not found.'}, status=404)
+
+        try:
+            comment = Comment(
+                post=post,
+                author=request.user,
+                content=content,
+                comment=parent_comment
+            )
+            comment.save()
+        except ValueError as e:
+            return Response({'detail': str(e)}, status=400)
+
+        serializer = self.get_serializer(comment)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

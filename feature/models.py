@@ -49,5 +49,15 @@ class Comment(models.Model):
     comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    depth = models.IntegerField(default=0)
     def __str__(self):
-        return f"{self.author.username} - {self.content[:20]}"
+        return f"{self.author.username} - {self.content[:20]}"\
+    
+    def save(self, *args, **kwargs):
+        if self.comment: 
+            if self.comment.depth >= 3:
+                raise ValueError("Maximum depth of 3 reached for comments.")
+            self.depth = self.comment.depth + 1
+        else:
+            self.depth = 0
+        super().save(*args, **kwargs)
