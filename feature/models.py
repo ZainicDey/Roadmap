@@ -29,6 +29,10 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name_plural = 'Posts'
+
 
 class Reaction(models.Model):
     REACTION_CHOICES = (
