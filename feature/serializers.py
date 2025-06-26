@@ -41,7 +41,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'author', 'content', 'comment', 'created_at', 'updated_at', 'replies', 'self_comment']
+        fields = ['id', 'post', 'author', 'content', 'comment', 'depth', 'created_at', 'updated_at', 'replies', 'self_comment']
 
     def get_replies(self, obj):
         replies = obj.replies.all()
@@ -50,7 +50,8 @@ class CommentSerializer(serializers.ModelSerializer):
     def get_self_comment(self, obj):
         user = self.context['request'].user
         return user.is_authenticated and obj.author == user
-    
+    read_only_fields = ['depth', 'created_at', 'updated_at']
+
 class PostDetailSerializer(PostSerializer):
     comments = serializers.SerializerMethodField()
 
