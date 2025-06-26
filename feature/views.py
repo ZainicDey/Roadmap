@@ -161,3 +161,22 @@ class CommentViewSet(ModelViewSet):
 
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+@api_view(['POST'])
+def register_views(request):
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password = request.data.get('password')
+    if not username or not email or not password:
+        return Response({'detail': 'Username, email, and password are required.'}, status=400)
+    from django.contrib.auth.models import User
+    if User.objects.filter(username=username).exists():
+        return Response({'detail': 'Username already exists.'}, status=400)
+    if User.objects.filter(email=email).exists():
+        return Response({'detail': 'Email already exists.'}, status=400)
+    User.objects.create_user(
+        username=username,
+        email=email,
+        password=password
+    )
+    return Response({'detail': 'User registered successfully.'}, status=201)
