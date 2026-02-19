@@ -137,16 +137,18 @@ WSGI_APPLICATION = 'roadmap.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': "postgres",
-        'USER': "postgres",
-        'PASSWORD': "anik@200162516251",
-        'HOST': "db.nenzlwwobgrpykhppoub.supabase.co",
-        'PORT': "5432",
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "anik@200162516251",
+        "HOST": "db.nenzlwwobgrpykhppoub.supabase.co",
+        "PORT": "5432",
+        "OPTIONS": {
+            "sslmode": "require",
+        },
     }
 }
-
 
 
 # Password validation
